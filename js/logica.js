@@ -29,9 +29,13 @@ fechaInscripcion: "2020-9-0T09:00:00.000Z"
 ];
 
 //Defino un id de prueba para comprobar si es correcto
-const idNuevo=900000;
-for(let i;i<50;i++){
+const idNuevo=null;
+let idCorrecto=false;
+function idUsuarioCorrecto(participantes,maximoIntentos=500) {
+    idNuevo =Math.floor(Math.random()*999999)+100000;
+    for(let i;i<50;i++){
     if(idNuevo!==participantes.id){
-        Math.floor(Math.random()*999999)+100000;
+        
     }
+}
 }
