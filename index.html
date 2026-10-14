@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plataforma de Inscripciones - Evento Tech</title>
+  <link rel="stylesheet" href="estilos.css">
+  <!-- Carga diferida de scripts: primero las funciones puras, luego el controlador principal -->
+  <script src="logica.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+<body class="modo-claro fuente-estandar">
+
+  <header>
+    <h1>Gestión de Participantes del Evento</h1>
+  </header>
+
+  <!-- SECCIÓN 1: Configuración de Preferencias Visuales (Cookies) -->
+  <section id="zona-preferencias">
+    <fieldset>
+      <legend>Ajustes de Preferencias</legend>
+      <div class="grupo-controles">
+        <div class="campo-control">
+          <label for="selTema">Tema visual:</label>
+          <select id="selTema">
+            <option value="claro">Modo Claro</option>
+            <option value="oscuro">Modo Oscuro</option>
+          </select>
+        </div>
+
+        <div class="campo-control">
+          <label for="selTamano">Tamaño de texto:</label>
+          <select id="selTamano">
+            <option value="normal">Estándar</option>
+            <option value="grande">Grande</option>
+          </select>
+        </div>
+
+        <div class="campo-control botones">
+          <button id="btnGuardarPref" type="button">Guardar preferencias</button>
+          <button id="btnRestablecerPref" type="button">Restablecer</button>
+          <button id="btnAbrirAyuda" type="button">Centro de Ayuda</button>
+        </div>
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- SECCIÓN 2: Formulario de Registro (novalidate para validación manual en JS) -->
+  <section id="zona-registro">
+    <form id="formAlta" novalidate>
+      <fieldset>
+        <legend>Formulario de Inscripción</legend>
+
+        <div class="campo">
+          <label for="nombre">Nombre y Apellidos:</label>
+          <input type="text" id="nombre" placeholder="Ej. Ana García">
+        </div>
+
+        <div class="campo">
+          <label for="edad">Edad (años):</label>
+          <input type="number" id="edad" placeholder="0 - 120">
+        </div>
+
+        <div class="campo">
+          <label for="tipo">Perfil del asistente:</label>
+          <select id="tipo">
+            <option value="estudiante">Estudiante</option>
+            <option value="profesional">Profesional</option>
+            <option value="invitado">Invitado</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="modalidad">Modalidad de asistencia:</label>
+          <select id="modalidad">
+            <option value="presencial">Presencial</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="experiencia">Nivel de experiencia (0.0 a 10.0):</label>
+          <input type="number" id="experiencia" step="0.1" placeholder="Ej. 4.5">
+        </div>
+
+        <button type="submit" class="btn-principal">Registrar Participante</button>
+      </fieldset>
+    </form>
+    <!-- Contenedor para mostrar mensajes de validación generados por JS -->
+    <div id="erroresForm" class="caja-errores"></div>
+  </section>
+
+  <!-- SECCIÓN 3: Filtros de Búsqueda y Listado de Asistentes -->
+  <section id="zona-listado">
+    <fieldset>
+      <legend>Asistentes Registrados</legend>
+      <div class="barra-filtros">
+        <div class="campo">
+          <label for="buscarNombre">Buscar por nombre:</label>
+          <input type="text" id="buscarNombre" placeholder="Escriba un nombre...">
+        </div>
+
+        <div class="campo">
+          <label for="filtroModalidad">Filtrar por modalidad:</label>
+          <select id="filtroModalidad">
+            <option value="todas">Todas las modalidades</option>
+            <option value="presencial">Presencial</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="mensajeFiltro" class="info-resultado"></p>
+      <!-- Contenedor dinámico de tarjetas (manipulado desde main.js) -->
+      <div id="contenedorTarjetas" class="grid-tarjetas"></div>
+    </fieldset>
+  </section>
+
+  <!-- SECCIÓN 4: Métricas y Estadísticas del Evento -->
+  <section id="zona-estadisticas">
+    <fieldset>
+      <legend>Resumen Estadístico</legend>
+      <div id="panelEstadisticas" class="caja-stats"></div>
+    </fieldset>
+  </section>
+
+  <!-- SECCIÓN 5: Intercambio de Información JSON -->
+  <section id="zona-json">
+    <fieldset>
+      <legend>Transferencia de Datos (JSON)</legend>
+      <textarea id="jsonArea" rows="5" placeholder="Pegue aquí una cadena JSON para importar o haga clic en Exportar..."></textarea>
+      <div class="acciones-json">
+        <button id="btnExportarJSON" type="button">Exportar a JSON</button>
+        <button id="btnImportarJSON" type="button">Importar desde JSON</button>
+      </div>
+      <div id="mensajeJson" class="info-json"></div>
+    </fieldset>
+  </section>
+
+  <!-- SECCIÓN 6: Vista del Iframe Incrustado -->
+  <section id="zona-iframe">
+    <fieldset>
+      <legend>Vista Previa en Tiempo Real (Iframe)</legend>
+      <iframe id="visorPanel" src="panel.html" title="Resumen compacto del evento"></iframe>
+    </fieldset>
+  </section>
+
+</body>
+</html>
