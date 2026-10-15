@@ -42,7 +42,7 @@ function crearTarjeta(p) {
   const tarjeta = document.createElement("article");
   tarjeta.classList.add("tarjeta");
 
-  // Clasificación por edad y experiencia exigida en el PDF
+  // Clasificación por edad y experiencia
   const esMenor = p.edad < 18;
   tarjeta.classList.add(esMenor ? "menor" : "mayor");
   tarjeta.setAttribute("data-id", p.id);
