@@ -166,19 +166,38 @@ function abrirVentanaAyuda() {
   }
 }
 
-// Iframe / postMessage
+// Iframe
 function notificarIframe() {
   const iframe = document.getElementById("visorPanel");
   if (iframe && iframe.contentWindow) {
     const stats = calcularEstadisticas(participantes);
-    const masReciente = participantes.length > 0 ? participantes[participantes.length - 1].nombre : "Ninguno";
     
+    // Variables para almacenar la información del último registro
+    let nombreUltimo = "Ninguno";
+    let fechaFormateada = "Sin fecha";
+
+    // Si hay participantes en el array, obtenemos el último
+    if (participantes.length > 0) {
+      const ultimo = participantes[participantes.length - 1];
+      
+      // Asignamos el nombre
+      nombreUltimo = ultimo.nombre;
+
+      // Si el último participante tiene fecha de inscripción, la formateamos
+      if (ultimo.fechaInscripcion) {
+        const fechaObj = new Date(ultimo.fechaInscripcion);
+        fechaFormateada = fechaObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+
+    // Enviamos el mensaje estructurado al iframe
     iframe.contentWindow.postMessage({
       tipo: "actualizacion",
       total: stats.total,
       presenciales: stats.presenciales,
       online: stats.online,
-      masReciente
+      masReciente: nombreUltimo,
+      fechaReciente: fechaFormateada
     }, location.origin);
   }
 }
