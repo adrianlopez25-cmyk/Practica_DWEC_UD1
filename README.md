@@ -18,7 +18,7 @@ Esta aplicación web permite gestionar la inscripción de asistentes a un evento
 
 \---
 
-\## 2. Estructura del Proyecto
+## 2. Estructura del Proyecto
 
 ```text
 
