@@ -108,41 +108,157 @@ El proyecto sigue una separación estricta de responsabilidades: `logica.js` no 
 ### Prueba 1: Alta de Participante con Datos Válidos
 
 * **Pasos:** Rellenar el formulario con Nombre="Lucía Torres", Edad=22, Tipo="profesional", Modalidad="presencial", Experiencia=6.5 y pulsar "Registrar Participante".
+```text
+const form1 = document.querySelector('form');
+document.querySelector('#nombre, [name="nombre"]').value = "Lucía Torres";
+document.querySelector('#edad, [name="edad"]').value = 22;
+document.querySelector('#tipo, [name="tipo"]').value = "profesional";
+document.querySelector('#modalidad, [name="modalidad"]').value = "presencial";
+document.querySelector('#experiencia, [name="experiencia"]').value = 6.5;
+form1.requestSubmit();
+```
+
 * **Resultado Esperado:** Se limpia el formulario, se añade una nueva tarjeta con la fecha de inscripción actual en español y las clasificaciones (Mayor de edad, Experiencia Intermedia). Se actualizan el contador global y la media de estadísticas.
 
 ### Prueba 2: Alta de Participante con Entradas Inválidas
 
 * **Pasos:** Rellenar Nombre=" A ", Edad="18abc", Tipo="estudiante", Modalidad="presencial", Experiencia=15 y enviar el formulario.
+```text
+const form2 = document.querySelector('form');
+document.querySelector('#nombre, [name="nombre"]').value = " A ";
+document.querySelector('#edad, [name="edad"]').value = "18abc";
+document.querySelector('#tipo, [name="tipo"]').value = "estudiante";
+document.querySelector('#modalidad, [name="modalidad"]').value = "presencial";
+document.querySelector('#experiencia, [name="experiencia"]').value = 15;
+
+form2.requestSubmit();
+console.log("Se debieron mostrar errores y rechazar el alta.");
+```
 * **Resultado Esperado:** Se muestra un mensaje de error claro especificando los campos erróneos. No se añade nada al listado, los valores erróneos permanecen en el formulario y las estadísticas no cambian.
 
 ### Prueba 3: Búsqueda y Filtrado Combinado
 
 * **Pasos:** Seleccionar modalidad "online" en el desplegable de filtro y escribir "Pedro" en la caja de búsqueda.
+```text
+const inputBusqueda = document.querySelector('input[type="search"], #buscar, [placeholder*="nombre"]');
+const selectFiltro = document.querySelector('select:not([name="tipo"])');
+
+if (selectFiltro) {
+  selectFiltro.value = "online";
+  selectFiltro.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+if (inputBusqueda) {
+  inputBusqueda.value = "Pedro";
+  inputBusqueda.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+console.log("Filtro 'online' y búsqueda 'Pedro' aplicados."); 
+```
 * **Resultado Esperado:** Se muestra únicamente la tarjeta de Pedro López. El indicador informa "Mostrando 1 de 3 participantes". Las estadísticas globales se mantienen intactas.
 
 ### Prueba 4: Eliminación con Confirmación y Cancelación
 
 * **Pasos:** En la tarjeta de Ana García, hacer clic en "Eliminar". En el diálogo emergente, presionar "Cancelar". Posteriormente, repetir el proceso y presionar "Aceptar".
+```text
+
+window.confirm = () => false;
+let btnEliminar = Array.from(document.querySelectorAll('button')).find(btn => 
+  btn.textContent.toLowerCase().includes('eliminar')
+);
+
+if (btnEliminar) {
+  btnEliminar.click();
+  console.log("Eliminación cancelada.");
+
+  // Confirmar eliminación tras 1 segundo
+  setTimeout(() => {
+    window.confirm = () => true;
+    btnEliminar = Array.from(document.querySelectorAll('button')).find(btn => 
+      btn.textContent.toLowerCase().includes('eliminar')
+    );
+    if (btnEliminar) btnEliminar.click();
+    console.log(" Eliminación confirmada.");
+  }, 1000);
+}
+```
 * **Resultado Esperado:** Al cancelar, la tarjeta y los datos permanecen. Al aceptar, se elimina la tarjeta, disminuye el número de inscritos y se sincroniza el `iframe`.
 
 ### Prueba 5: Importación de JSON Inválido o Mal Formado
 
 * **Pasos:** En el área de texto JSON, pegar `{"nombre": "Invalido"}` (no es un array) y pulsar "Importar".
+```text
+const areaJson = document.querySelector('textarea');
+const btnImportar = Array.from(document.querySelectorAll('button')).find(btn => 
+  btn.textContent.toLowerCase().includes('importar')
+);
+
+if (areaJson && btnImportar) {
+  areaJson.value = '{ "nombre": "Invalido" }';
+  areaJson.dispatchEvent(new Event('input', { bubbles: true }));
+  btnImportar.click();
+  console.log("Intento de importación de JSON mal formado.");
+}
+```
 * **Resultado Esperado:** Un mensaje de error alerta que el formato o los datos no son válidos. La lista actual se conserva intacta sin sufrir modificaciones parciales.
 
 ### Prueba 6: Lista Vacía (Manejo de Valores Límite)
 
 * **Pasos:** Eliminar uno a uno todos los participantes hasta dejar la lista a 0.
+```text
+window.confirm = () => true; // Auto-confirmar bajas
+
+const vaciarLista = () => {
+  const botonesEliminar = Array.from(document.querySelectorAll('button')).filter(btn => 
+    btn.textContent.trim().toLowerCase().includes('eliminar')
+  );
+  
+  if (botonesEliminar.length > 0) {
+    botonesEliminar.forEach(btn => btn.click());
+    console.log("Todos los participantes eliminados.");
+  } else {
+    console.log("La lista ya está vacía.");
+  }
+};
+
+vaciarLista();
+```
 * **Resultado Esperado:** El listado muestra un mensaje de "No hay participantes". Las estadísticas muestran "Sin datos" en medias/extremos y "0" en contadores. El `iframe` muestra el mensaje "Sin inscripciones".
 
 ### Prueba 7: Guardado, Lectura y Restablecimiento de Cookies
 
 * **Pasos:** Cambiar el tema a "Oscuro", el tamaño a "Grande" y pulsar "Guardar Preferencias". Abrir DevTools -> Application -> Cookies.
+```text
+const selectTema = document.getElementById("selTema");
+const selectTamano = document.getElementById("selTamano");
+
+if (selectTema) selectTema.value = "oscuro";
+if (selectTamano) selectTamano.value = "grande";
+
+const btnGuardarCookies = Array.from(document.querySelectorAll('button')).find(btn => 
+  btn.textContent.toLowerCase().includes('guardar')
+);
+
+if (btnGuardarCookies) {
+  btnGuardarCookies.click();
+  console.log("Preferencias aplicadas permanentemente.");
+  console.log("Cookies guardadas:", document.cookie);
+  console.log("Clases aplicadas al body:", document.body.className);
+}
+```
 * **Resultado Esperado:** Aparecen las cookies `pref_tema=oscuro` y `pref_tamano=grande`. Al pulsar "Restablecer", las cookies desaparecen (`Max-Age=0`) y la interfaz vuelve a tema claro y tamaño normal.
 
 ### Prueba 8: Seguridad postMessage (Mensajes Rechazados)
 
 * **Pasos:** Abrir la consola e intentar enviar un mensaje manualmente hacia el `iframe` con origen manipulado.
+```text
+const iframe = document.querySelector('iframe');
+
+if (iframe && iframe.contentWindow) {
+  iframe.contentWindow.postMessage({ total: 999, hack: true }, '*');
+  console.log("Mensaje no válido enviado al iframe.");
+}
+```
 * **Resultado Esperado:** El `iframe` ignora el mensaje por no cumplir la estructura completa requerida o por origen no autorizado. El panel no altera su DOM.
 
 ---
