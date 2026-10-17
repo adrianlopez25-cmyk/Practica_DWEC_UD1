@@ -4,17 +4,17 @@ Esta aplicación web permite gestionar la inscripción de asistentes a un evento
 
 ### Guía de Ejecución mediante Servidor HTTP Local (Requisito Obligatorio)
 
-El proyecto requiere ejecutarse en un entorno servidor HTTP para permitir el correcto intercambio de mensajes seguros por `postMessage` entre orígenes e `iframe`, así como el uso adecuado de cookies sin bloqueos por protocolo `file://`.
+El proyecto requiere ejecutarse en un entorno servidor HTTP para permitir el correcto intercambio de mensajes seguros por postMessage entre orígenes e iframe, así como el uso adecuado de cookies sin bloqueos por protocolo file://.
 
 - **Vía VS Code (Live Server):**
   1. Abrir la carpeta raíz del proyecto en VS Code.
-  2. Hacer clic derecho sobre `index.html` y seleccionar **"Open with Live Server"**.
-  3. La aplicación se abrirá automáticamente en `http://127.0.0.1:5500` o `http://localhost:5500`.
+  2. Hacer clic derecho sobre index.html y seleccionar **"Open with Live Server"**.
+  3. La aplicación se abrirá automáticamente en http://127.0.0.1:5500 o http://localhost:5500.
 
-- **Vía Node.js (`http-server` o `npx`):**
+- **Vía Node.js (http-server o npx):**
   1. Abrir la terminal en la raíz del proyecto.
-  2. Ejecutar: `npx http-server -p 8080`
-  3. Acceder en el navegador a: `http://localhost:8080`.
+  2. Ejecutar: npx http-server -p 8080
+  3. Acceder en el navegador a: http://localhost:8080.
 
 ---
 
@@ -364,7 +364,7 @@ De acuerdo con las directrices de la práctica, la Inteligencia Artificial se ut
 ## Registro de Decisión y Análisis Técnico
 ---
 
-### 6.1. Registro de Decisión: Gestión de Formulario y Eventos en la Interfaz (main.js)
+### 6.1. Registro de Decisión: Gestión de Formulario y Eventos en la Interfaz (`main.js`)
 
 #### Consulta Realizada a la IA
 
@@ -377,14 +377,13 @@ La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e intera
 1. **Evitar la recarga de la página:** Al pulsar el botón de enviar, el navegador intenta recargar la página por defecto. Para evitarlo hay que escuchar el evento submit sobre el formulario y ejecutar evento.preventDefault().
 2. **Leer y transformar los datos de entrada:** Todo lo que entra por un campo de texto en HTML llega como una cadena de texto (String). Para que los datos sean fiables, hay que aplicar .trim() para eliminar espacios en blanco innecesarios al principio y al final, y convertir los valores explícitamente con Number().
 3. **Limpiar el formulario:** Se pueden resetear los campos asignándoles una cadena vacía (.value = '') o mediante la instrucción formulario.reset().
-4. **Eventos en tiempo real:** Para reaccionar inmediatamente a las acciones del usuario sin esperar al envío, el evento change sirve para reaccionar al cambiar de opción en desplegables (<select>), mientras que el evento input se dispara de forma instantánea al escribir o borrar en campos de texto.
+4. **Eventos en tiempo real:** Para reaccionar inmediatamente a las acciones del usuario sin esperar al envío, el evento change sirve para reaccionar al cambiar de opción en desplegables (<select>), mientras que el evento `input` se dispara de forma instantánea al escribir o borrar en campos de texto.
 
 #### Decisiones Tomadas y Aplicación en el Proyecto
 
-- **Uso de preventDefault():** Decidí aplicarlo dentro del listener del formulario de inscripción. De esta forma, la alta del participante se procesa en segundo plano sin refrescar la ventana, lo que permite actualizar dinámicamente las tarjetas en el DOM, recalcular las estadísticas y notificar los datos al iframe sin perder el estado de la aplicación.
+- **Uso de `preventDefault()`:** Decidí aplicarlo dentro del listener del formulario de inscripción. De esta forma, la alta del participante se procesa en segundo plano sin refrescar la ventana, lo que permite actualizar dinámicamente las tarjetas en el DOM, recalcular las estadísticas y notificar los datos al iframe sin perder el estado de la aplicación.
 - **Saneamiento previo a la validación:** Entendí que la función pura de logica.js debe recibir los datos bien formateados. Por eso, en main.js aplico .trim() a los campos de texto y convierto la edad y la experiencia mediante Number() justo antes de pasárselos a la función validarParticipante().
 - **Filtros en tiempo real:** Decidí usar el evento input para el buscador de participantes por nombre y el evento change para el selector de modalidad. Así, la vista de tarjetas se actualiza al instante mientras el usuario escribe o selecciona, combinando la búsqueda y el filtro de forma fluida.
-
 ---
 
 ## 7. Evidencias de Depuración y Red
