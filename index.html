@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Plataforma de Inscripciones - Evento Tech</title>
-  <link rel="stylesheet" href="estilos.css">
-  <!-- Carga diferida de scripts: primero las funciones puras, luego el controlador principal -->
-  <script src="logica.js" defer></script>
-  <script src="main.js" defer></script>
+  
+  <!-- Hoja de estilos en la carpeta css/ -->
+  <link rel="stylesheet" href="css/estilos.css">
+  
+  <!-- Scripts de la aplicación en la carpeta js/ -->
+  <script src="js/logica.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/ayuda.js" defer></script>
+
   <link rel="icon" href="data:,">
 </head>
 <body class="modo-claro fuente-estandar">
@@ -45,7 +50,7 @@
     </fieldset>
   </section>
 
-  <!-- SECCIÓN 2: Formulario de Registro (novalidate para validación manual en JS) -->
+  <!-- SECCIÓN 2: Formulario de Registro -->
   <section id="zona-registro">
     <form id="formAlta" novalidate>
       <fieldset>
@@ -86,7 +91,6 @@
         <button type="submit" class="btn-principal">Registrar Participante</button>
       </fieldset>
     </form>
-    <!-- Contenedor para mostrar mensajes de validación generados por JS -->
     <div id="erroresForm" class="caja-errores"></div>
   </section>
 
@@ -111,7 +115,6 @@
       </div>
 
       <p id="mensajeFiltro" class="info-resultado"></p>
-      <!-- Contenedor dinámico de tarjetas (manipulado desde main.js) -->
       <div id="contenedorTarjetas" class="grid-tarjetas"></div>
     </fieldset>
   </section>
