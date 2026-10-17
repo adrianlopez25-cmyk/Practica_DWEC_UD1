@@ -314,7 +314,7 @@ La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e intera
   2. Se colocó un punto de interrupción (*breakpoint*) en la línea 71 de `logica.js`.
   3. Se completó el formulario de alta con datos de prueba y se pulsó "Registrar Participante".
   4. La ejecución se pausó automáticamente en el *breakpoint*, permitiendo inspeccionar las variables del objeto `datos` (`edadTexto`, `edadNum`) en el panel **Scope** y avanzar paso a paso con `F10` (*Step Over*) para verificar la evaluación condicional de errores.
-
+<img width="1913" height="946" alt="image" src="https://github.com/user-attachments/assets/19eab6ec-8e37-4f34-9753-0a0858d0fa43" />
 
 
 ---
@@ -327,7 +327,6 @@ La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e intera
   2. `GET /css/estilos.css`: Hoja de estilos global.
   3. `GET /js/logica.js`, `main.js`, `panel.js`, `ayuda.js`: Archivos de código JavaScript ejecutados en el cliente.
   4. `GET /panel.html`: Documento del panel incrustado mediante el elemento `iframe`.
-<img width="1913" height="946" alt="image" src="https://github.com/user-attachments/assets/19eab6ec-8e37-4f34-9753-0a0858d0fa43" />
 
 
 * **Análisis de Seguridad y Same-Origin Policy (SOP):**
