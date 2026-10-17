@@ -1,4 +1,7 @@
-const participantes = [
+// Cargar datos de localStorage si existen, o usar la lista inicial por defecto
+const datosGuardados = localStorage.getItem("participantes");
+
+const participantes = datosGuardados ? JSON.parse(datosGuardados) : [
   {
     id: 483721,
     nombre: "Ana García",
@@ -6,7 +9,7 @@ const participantes = [
     tipo: "estudiante",
     modalidad: "presencial",
     experiencia: 4,
-    fechaInscripcion: "2026-10-08T08:30:00.000Z"
+    fechaInscripcion: "2026-10-17T15:00:00.000Z"
   },
   {
     id: 138009,
@@ -15,7 +18,7 @@ const participantes = [
     tipo: "profesional",
     modalidad: "online",
     experiencia: 8,
-    fechaInscripcion: "2026-03-01T09:00:00.000Z" // Corregido el día de 0 a 01
+    fechaInscripcion: "2026-10-17T15:05:00.000Z"
   },
   {
     id: 853000,
@@ -24,7 +27,7 @@ const participantes = [
     tipo: "invitado",
     modalidad: "presencial",
     experiencia: 9.999,
-    fechaInscripcion: "2020-09-01T09:00:00.000Z" // Corregido el día de 0 a 01
+    fechaInscripcion: "2026-10-17T15:10:00.000Z"
   }
 ];
 

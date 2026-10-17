@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Manejador del envío del formulario
 function manejarAlta(e) {
-  e.preventDefault(); // <-- OBLIGATORIO: Cancela la recarga de página
+  e.preventDefault(); // <-- Cancela la recarga automática de la página
 
   const erroresDiv = document.getElementById("erroresForm");
   erroresDiv.innerHTML = "";
@@ -56,11 +56,10 @@ function manejarAlta(e) {
     experiencia: document.getElementById("experiencia").value
   };
 
-  // Validar usando logica.js
+  // Validar datos de entrada mediante la función lógica
   const validacion = validarParticipante(datosForm);
 
   if (!validacion.valido) {
-    // Mostrar errores en pantalla
     const ul = document.createElement("ul");
     ul.style.color = "red";
     for (const err of validacion.errores) {
@@ -72,7 +71,7 @@ function manejarAlta(e) {
     return;
   }
 
-  // Si es válido, crear el objeto participante y añadirlo al array de logica.js
+  // Si la validación es correcta, instanciar nuevo participante
   const nuevoParticipante = {
     id: generarId(participantes),
     nombre: datosForm.nombre.trim(),
@@ -84,11 +83,15 @@ function manejarAlta(e) {
   };
 
   participantes.push(nuevoParticipante);
+  
+  // Sincronizar en localStorage
+  localStorage.setItem("participantes", JSON.stringify(participantes));
+
   document.getElementById("formAlta").reset();
   renderizarTodo();
 }
 
-// Renderizado de la interfaz
+// Renderizado global de la interfaz
 function renderizarTodo() {
   renderizarTarjetas();
   renderizarEstadisticas();
@@ -138,6 +141,10 @@ function eliminarParticipante(id) {
     const idx = participantes.findIndex(p => p.id === id);
     if (idx !== -1) {
       participantes.splice(idx, 1);
+      
+      // Actualizar localStorage tras eliminación
+      localStorage.setItem("participantes", JSON.stringify(participantes));
+      
       renderizarTodo();
     }
   }
@@ -156,7 +163,7 @@ function renderizarEstadisticas() {
   `;
 }
 
-// Ventana de ayuda
+// Ventana de ayuda emergente
 let ventanaAyudaRef = null;
 function abrirVentanaAyuda() {
   if (!ventanaAyudaRef || ventanaAyudaRef.closed) {
@@ -166,31 +173,25 @@ function abrirVentanaAyuda() {
   }
 }
 
-// Iframe
+// Sincronización con el iframe flotante mediante postMessage
 function notificarIframe() {
   const iframe = document.getElementById("visorPanel");
   if (iframe && iframe.contentWindow) {
     const stats = calcularEstadisticas(participantes);
     
-    // Variables para almacenar la información del último registro
     let nombreUltimo = "Ninguno";
     let fechaFormateada = "Sin fecha";
 
-    // Si hay participantes en el array, obtenemos el último
     if (participantes.length > 0) {
       const ultimo = participantes[participantes.length - 1];
-      
-      // Asignamos el nombre
       nombreUltimo = ultimo.nombre;
 
-      // Si el último participante tiene fecha de inscripción, la formateamos
       if (ultimo.fechaInscripcion) {
         const fechaObj = new Date(ultimo.fechaInscripcion);
         fechaFormateada = fechaObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
     }
 
-    // Enviamos el mensaje estructurado al iframe
     iframe.contentWindow.postMessage({
       tipo: "actualizacion",
       total: stats.total,
@@ -209,21 +210,41 @@ function recibirMensajeIframe(e) {
   }
 }
 
-// JSON Import / Export
+// Transferencia de datos JSON (Import / Export)
 function exportarJSON() {
-  document.getElementById("jsonArea").value = JSON.stringify(participantes, null, 2);
-  document.getElementById("mensajeJson").textContent = "Datos exportados correctamente.";
+  const area = document.getElementById("jsonArea");
+  const msg = document.getElementById("mensajeJson");
+  
+  area.value = JSON.stringify(participantes, null, 2);
+  msg.style.color = "green";
+  msg.textContent = "Datos exportados correctamente.";
 }
 
 function importarJSON() {
-  const area = document.getElementById("jsonArea").value;
+  const area = document.getElementById("jsonArea").value.trim();
   const msg = document.getElementById("mensajeJson");
+
+  if (!area) {
+    msg.style.color = "red";
+    msg.textContent = "El área de texto está vacía.";
+    return;
+  }
+
   try {
     const datos = JSON.parse(area);
     if (Array.isArray(datos)) {
+      // 1. Vaciar array manteniendo la referencia 'const'
       participantes.length = 0;
+      
+      // 2. Insertar los nuevos elementos importados
       datos.forEach(p => participantes.push(p));
+      
+      // 3. Guardar persistencia en localStorage
+      localStorage.setItem("participantes", JSON.stringify(participantes));
+
+      // 4. Actualizar toda la interfaz de usuario
       renderizarTodo();
+
       msg.style.color = "green";
       msg.textContent = "Datos importados con éxito.";
     } else {
@@ -235,18 +256,27 @@ function importarJSON() {
   }
 }
 
-// Cookies
+// Manejo de Preferencias mediante Cookies
 function guardarPreferenciasUI() {
   const tema = document.getElementById("selTema").value;
-  const tamano = document.getElementById("selTamano").value;
+  let tamano = document.getElementById("selTamano").value;
+  
+  // Convertir 'normal' del select a 'estandar' para que coincida con la clase CSS .fuente-estandar
+  if (tamano === "normal") tamano = "estandar";
+
   document.cookie = `pref_tema=${tema}; path=/; max-age=31536000; SameSite=Lax`;
   document.cookie = `pref_tamano=${tamano}; path=/; max-age=31536000; SameSite=Lax`;
+  
   aplicarPreferenciasGuardadas();
 }
 
 function restablecerPreferenciasUI() {
-  document.cookie = "pref_tema=; path=/; max-age=0";
-  document.cookie = "pref_tamano=; path=/; max-age=0";
+  document.cookie = "pref_tema=; path=/; max-age=0; path=/";
+  document.cookie = "pref_tamano=; path=/; max-age=0; path=/";
+  
+  document.getElementById("selTema").value = "claro";
+  document.getElementById("selTamano").value = "normal";
+
   document.body.className = "modo-claro fuente-estandar";
 }
 
@@ -258,6 +288,13 @@ function aplicarPreferenciasGuardadas() {
     if (c.startsWith("pref_tema=")) tema = c.split("=")[1];
     if (c.startsWith("pref_tamano=")) tamano = c.split("=")[1];
   }
+
+  // Sincronizar selectores si existen en el DOM
+  const selTema = document.getElementById("selTema");
+  const selTamano = document.getElementById("selTamano");
+
+  if (selTema) selTema.value = tema;
+  if (selTamano) selTamano.value = (tamano === "estandar") ? "normal" : tamano;
 
   document.body.className = `modo-${tema} fuente-${tamano}`;
 }
