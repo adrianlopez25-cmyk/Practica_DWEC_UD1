@@ -1,34 +1,34 @@
 const participantes = [
-{
-id: 483721,
-nombre: "Ana García",
-edad: 17,
-tipo: "estudiante",
-modalidad: "presencial",
-experiencia: 4,
-fechaInscripcion: "2026-10-08T08:30:00.000Z"
-},
-{
-id: 138009,
-nombre: "Pedro Lopez",
-edad: 29,
-tipo: "profesional",
-modalidad: "online",
-experiencia: 8,
-fechaInscripcion: "2026-3-0T09:00:00.000Z"
-},
-{
-id: 853000,
-nombre: "Carlos perez",
-edad: 90,
-tipo: "invitado",
-modalidad: "presencial",
-experiencia: 9.999,
-fechaInscripcion: "2020-9-0T09:00:00.000Z"
-}
+  {
+    id: 483721,
+    nombre: "Ana García",
+    edad: 17,
+    tipo: "estudiante",
+    modalidad: "presencial",
+    experiencia: 4,
+    fechaInscripcion: "2026-10-08T08:30:00.000Z"
+  },
+  {
+    id: 138009,
+    nombre: "Pedro Lopez",
+    edad: 29,
+    tipo: "profesional",
+    modalidad: "online",
+    experiencia: 8,
+    fechaInscripcion: "2026-03-01T09:00:00.000Z" // Corregido el día de 0 a 01
+  },
+  {
+    id: 853000,
+    nombre: "Carlos perez",
+    edad: 90,
+    tipo: "invitado",
+    modalidad: "presencial",
+    experiencia: 9.999,
+    fechaInscripcion: "2020-09-01T09:00:00.000Z" // Corregido el día de 0 a 01
+  }
 ];
 
-//Genera un numero entre 100000 y 99999 sin duplicados y le pondre de limite 100 por que me aconsejo la IA para que no se diese un bloqueo o congelamiento.
+// Genera un número aleatorio de 6 dígitos (100000 a 999999) sin duplicados
 function generarId(participantes) {
   let nuevoId;
   let intentos = 0;
@@ -54,13 +54,13 @@ function generarId(participantes) {
 function validarParticipante(datos) {
   const errores = [];
 
-  // Quito los espacios al inicio y final del nombre con .trim() y obligo a que tenga la longitud corercta (2 a 60)
+  // Quito los espacios al inicio y final del nombre con .trim() y obligo a que tenga la longitud correcta (2 a 60)
   const nombreLimpio = typeof datos.nombre === "string" ? datos.nombre.trim() : "";
   if (nombreLimpio.length < 2 || nombreLimpio.length > 60) {
     errores.push("El nombre debe tener entre 2 y 60 caracteres.");
   }
 
-  // Number("") devuelve 0. Por eso primero comprobare que la cadena no esté vacía.
+  // Number("") devuelve 0. Por eso primero comprobaremos que la cadena no esté vacía.
   const edadTexto = String(datos.edad).trim();
   const edadNum = Number(edadTexto);
   if (
@@ -97,6 +97,7 @@ function validarParticipante(datos) {
     errores
   };
 }
+
 function calcularEstadisticas(participantes) {
   const total = participantes.length;
 
@@ -166,7 +167,7 @@ function calcularEstadisticas(participantes) {
     total,
     menores,
     mayores,
-    edadMedia: (sumaEdad / total).toFixed(2), // Formato a 2 decimales
+    edadMedia: (sumaEdad / total).toFixed(2),
     edadMin,
     edadMax,
     presenciales,

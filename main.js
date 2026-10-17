@@ -1,141 +1,54 @@
-// main.js - Controlador Principal de la Interfaz (DOM)
+// main.js - Controlador Principal del DOM
 
-// 1. Estado en memoria de la colección de participantes
-let participantes = [...participantesIniciales];
-
-// Variable global para controlar la referencia de la ventana emergente de ayuda
-let ventanaAyuda = null;
-
-// Esperamos a que el DOM esté completamente cargado antes de ejecutar eventos
 document.addEventListener("DOMContentLoaded", () => {
-  aplicarPreferenciasGuardadas(); // Recupera cookies de tema y tamaño
-  renderizarTodo();               // Pinta tarjetas, estadísticas y envía datos al iframe
+  // 1. Aplicar preferencias guardadas si existen en Cookies
+  aplicarPreferenciasGuardadas();
 
-  // Escuchadores de eventos de la interfaz
-  document.getElementById("formAlta").addEventListener("submit", manejarAlta);
-  document.getElementById("buscarNombre").addEventListener("input", renderizarTarjetas);
-  document.getElementById("filtroModalidad").addEventListener("change", renderizarTarjetas);
-  document.getElementById("btnExportarJSON").addEventListener("click", exportarJSON);
-  document.getElementById("btnImportarJSON").addEventListener("click", importarJSON);
-  document.getElementById("btnGuardarPref").addEventListener("click", guardarPreferenciasUI);
-  document.getElementById("btnRestablecerPref").addEventListener("click", restablecerPreferenciasUI);
-  document.getElementById("btnAbrirAyuda").addEventListener("click", abrirVentanaAyuda);
+  // 2. Renderizado inicial de tarjetas y estadísticas
+  renderizarTodo();
 
-  // Escuchador del protocolo de seguridad postMessage con el iframe
+  // 3. Registro de Eventos con comprobación de existencia
+  const formAlta = document.getElementById("formAlta");
+  if (formAlta) {
+    formAlta.addEventListener("submit", manejarAlta);
+  }
+
+  const busqueda = document.getElementById("buscarNombre");
+  if (busqueda) {
+    busqueda.addEventListener("input", renderizarTarjetas);
+  }
+
+  const filtroMod = document.getElementById("filtroModalidad");
+  if (filtroMod) {
+    filtroMod.addEventListener("change", renderizarTarjetas);
+  }
+
+  const btnExportar = document.getElementById("btnExportarJSON");
+  if (btnExportar) btnExportar.addEventListener("click", exportarJSON);
+
+  const btnImportar = document.getElementById("btnImportarJSON");
+  if (btnImportar) btnImportar.addEventListener("click", importarJSON);
+
+  const btnGuardarPref = document.getElementById("btnGuardarPref");
+  if (btnGuardarPref) btnGuardarPref.addEventListener("click", guardarPreferenciasUI);
+
+  const btnRestablecerPref = document.getElementById("btnRestablecerPref");
+  if (btnRestablecerPref) btnRestablecerPref.addEventListener("click", restablecerPreferenciasUI);
+
+  const btnAyuda = document.getElementById("btnAbrirAyuda");
+  if (btnAyuda) btnAyuda.addEventListener("click", abrirVentanaAyuda);
+
   window.addEventListener("message", recibirMensajeIframe);
 });
 
-/**
- * Función orquestadora que actualiza todas las zonas de la pantalla
- */
-function renderizarTodo() {
-  renderizarTarjetas();
-  renderizarEstadisticas();
-  enviarMensajeIframe();
-}
-
-/**
- * Construcción de Tarjetas con createElement, textContent y append
- * IMPORTANTE PARA LA DEFENSA: Se prohíbe innerHTML al generar tarjetas para evitar XSS (inyección de código).
- */
-function crearTarjeta(p) {
-  const tarjeta = document.createElement("article");
-  tarjeta.classList.add("tarjeta");
-
-  // Clasificación por edad y experiencia
-  const esMenor = p.edad < 18;
-  tarjeta.classList.add(esMenor ? "menor" : "mayor");
-  tarjeta.setAttribute("data-id", p.id);
-
-  let expClase = "inicial";
-  if (p.experiencia >= 7) expClase = "avanzada";
-  else if (p.experiencia >= 4) expClase = "intermedia";
-
-  // Creación de elementos internos
-  const titulo = document.createElement("h3");
-  titulo.textContent = p.nombre;
-
-  const det1 = document.createElement("p");
-  det1.textContent = `ID: ${p.id} | Edad: ${p.edad} (${esMenor ? "Menor de edad" : "Mayor de edad"})`;
-
-  const det2 = document.createElement("p");
-  det2.textContent = `Perfil: ${p.tipo} | Modalidad: ${p.modalidad}`;
-
-  const det3 = document.createElement("p");
-  det3.textContent = `Experiencia: ${p.experiencia} (${expClase})`;
-
-  // Formateo de fecha ISO a formato en español
-  const fechaObj = new Date(p.fechaInscripcion);
-  const detFecha = document.createElement("p");
-  detFecha.textContent = `Fecha de registro: ${fechaObj.toLocaleString("es-ES")}`;
-
-  // Botón de eliminación individual con confirmación
-  const btnBorrar = document.createElement("button");
-  btnBorrar.textContent = "Eliminar Registro";
-  btnBorrar.addEventListener("click", () => {
-    if (confirm(`¿Está seguro de que desea dar de baja a ${p.nombre}?`)) {
-      // Filtramos la colección para eliminar el elemento
-      participantes = participantes.filter(item => item.id !== p.id);
-      renderizarTodo(); // Actualizamos interfaz y estadísticas
-    }
-  });
-
-  // Ensamblado seguro del nodo sin usar innerHTML
-  tarjeta.append(titulo, det1, det2, det3, detFecha, btnBorrar);
-  return tarjeta;
-}
-
-/**
- * Renderiza el listado aplicando los filtros de búsqueda por nombre y modalidad
- */
-function renderizarTarjetas() {
-  const contenedor = document.getElementById("contenedorTarjetas");
-  contenedor.innerHTML = ""; // Limpiar el contenedor principal sí está permitido
-
-  const busqueda = document.getElementById("buscarNombre").value.toLowerCase().trim();
-  const modFiltro = document.getElementById("filtroModalidad").value;
-
-  // Filtrado combinado
-  const filtrados = participantes.filter(p => {
-    const coincideNombre = p.nombre.toLowerCase().includes(busqueda);
-    const coincideMod = modFiltro === "todas" || p.modalidad === modFiltro;
-    return coincideNombre && coincideMod;
-  });
-
-  const msgFiltro = document.getElementById("mensajeFiltro");
-  if (filtrados.length === 0) {
-    msgFiltro.textContent = "No se encontraron coincidencias para la búsqueda.";
-  } else {
-    msgFiltro.textContent = "";
-    for (const p of filtrados) {
-      contenedor.append(crearTarjeta(p));
-    }
-  }
-}
-
-/**
- * Pinta las estadísticas usando la función pura calcularEstadisticas() de logica.js
- */
-function renderizarEstadisticas() {
-  const st = calcularEstadisticas(participantes);
-  const div = document.getElementById("panelEstadisticas");
-  div.innerHTML = `
-    <p><strong>Total Inscritos:</strong> ${st.total} (Menores: ${st.menores}, Mayores: ${st.mayores})</p>
-    <p><strong>Rango de Edad:</strong> Media: ${st.edadMedia} | Mínima: ${st.edadMin} | Máxima: ${st.edadMax}</p>
-    <p><strong>Desglose por Modalidad:</strong> Presencial: ${st.presenciales} | Online: ${st.online}</p>
-    <p><strong>Desglose por Perfil:</strong> Estudiantes: ${st.estudiantes} | Profesionales: ${st.profesionales} | Invitados: ${st.invitados}</p>
-    <p><strong>Exp. Media Presencial:</strong> ${st.expMediaPresencial}</p>
-    <p><strong>Primer Menor Registrado:</strong> ${st.primerMenor}</p>
-  `;
-}
-
-/**
- * Procesa el envío del formulario de alta
- */
+// Manejador del envío del formulario
 function manejarAlta(e) {
-  e.preventDefault(); // Evita que la página se recargue
+  e.preventDefault(); // <-- OBLIGATORIO: Cancela la recarga de página
 
-  const datos = {
+  const erroresDiv = document.getElementById("erroresForm");
+  erroresDiv.innerHTML = "";
+
+  const datosForm = {
     nombre: document.getElementById("nombre").value,
     edad: document.getElementById("edad").value,
     tipo: document.getElementById("tipo").value,
@@ -143,199 +56,189 @@ function manejarAlta(e) {
     experiencia: document.getElementById("experiencia").value
   };
 
-  // Validamos con logica.js
-  const resVal = validarParticipante(datos);
-  const divErr = document.getElementById("erroresForm");
-  divErr.innerHTML = "";
+  // Validar usando logica.js
+  const validacion = validarParticipante(datosForm);
 
-  if (!resVal.valido) {
-    for (const err of resVal.errores) {
-      const p = document.createElement("p");
-      p.textContent = err;
-      divErr.append(p);
+  if (!validacion.valido) {
+    // Mostrar errores en pantalla
+    const ul = document.createElement("ul");
+    ul.style.color = "red";
+    for (const err of validacion.errores) {
+      const li = document.createElement("li");
+      li.textContent = err;
+      ul.appendChild(li);
     }
-    return; // Si no es válido, se conservan los valores introducidos sin modificar la lista
+    erroresDiv.appendChild(ul);
+    return;
   }
 
-  // Si es válido, creamos el participante con ID y Fecha ISO
-  const nuevo = {
+  // Si es válido, crear el objeto participante y añadirlo al array de logica.js
+  const nuevoParticipante = {
     id: generarId(participantes),
-    nombre: datos.nombre.trim(),
-    edad: Number(datos.edad),
-    tipo: datos.tipo,
-    modalidad: datos.modalidad,
-    experiencia: Number(datos.experiencia),
+    nombre: datosForm.nombre.trim(),
+    edad: Number(datosForm.edad),
+    tipo: datosForm.tipo,
+    modalidad: datosForm.modalidad,
+    experiencia: Number(datosForm.experiencia),
     fechaInscripcion: new Date().toISOString()
   };
 
-  participantes.push(nuevo);
-  document.getElementById("formAlta").reset(); // Limpia campos tras el alta
+  participantes.push(nuevoParticipante);
+  document.getElementById("formAlta").reset();
   renderizarTodo();
 }
 
-/* ==========================================================================
-   2. INTERCAMBIO JSON (Importación / Exportación)
-   ========================================================================== */
+// Renderizado de la interfaz
+function renderizarTodo() {
+  renderizarTarjetas();
+  renderizarEstadisticas();
+  notificarIframe();
+}
+
+function renderizarTarjetas() {
+  const contenedor = document.getElementById("contenedorTarjetas");
+  if (!contenedor) return;
+  contenedor.innerHTML = "";
+
+  const busqueda = (document.getElementById("buscarNombre")?.value || "").toLowerCase().trim();
+  const modFiltro = document.getElementById("filtroModalidad")?.value || "todas";
+
+  const filtrados = participantes.filter(p => {
+    const coincideNombre = p.nombre.toLowerCase().includes(busqueda);
+    const coincideModalidad = modFiltro === "todas" || p.modalidad === modFiltro;
+    return coincideNombre && coincideModalidad;
+  });
+
+  const msgFiltro = document.getElementById("mensajeFiltro");
+  if (msgFiltro) {
+    msgFiltro.textContent = `Mostrando ${filtrados.length} de ${participantes.length} participantes.`;
+  }
+
+  filtrados.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "tarjeta-participante";
+    
+    const h4 = document.createElement("h4");
+    h4.textContent = `${p.nombre} (ID: ${p.id})`;
+
+    const pDetalles = document.createElement("p");
+    pDetalles.textContent = `Edad: ${p.edad} | Perfil: ${p.tipo} | Modalidad: ${p.modalidad} | Exp: ${p.experiencia}`;
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.textContent = "Eliminar";
+    btnEliminar.addEventListener("click", () => eliminarParticipante(p.id));
+
+    card.append(h4, pDetalles, btnEliminar);
+    contenedor.appendChild(card);
+  });
+}
+
+function eliminarParticipante(id) {
+  if (confirm("¿Está seguro de eliminar a este participante?")) {
+    const idx = participantes.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      participantes.splice(idx, 1);
+      renderizarTodo();
+    }
+  }
+}
+
+function renderizarEstadisticas() {
+  const panel = document.getElementById("panelEstadisticas");
+  if (!panel) return;
+
+  const stats = calcularEstadisticas(participantes);
+  panel.innerHTML = `
+    <p><strong>Total:</strong> ${stats.total}</p>
+    <p><strong>Edad media:</strong> ${stats.edadMedia}</p>
+    <p><strong>Presenciales:</strong> ${stats.presenciales} | <strong>Online:</strong> ${stats.online}</p>
+    <p><strong>Primer menor:</strong> ${stats.primerMenor}</p>
+  `;
+}
+
+// Ventana de ayuda
+let ventanaAyudaRef = null;
+function abrirVentanaAyuda() {
+  if (!ventanaAyudaRef || ventanaAyudaRef.closed) {
+    ventanaAyudaRef = window.open("ayuda.html", "CentroAyuda", "width=500,height=500");
+  } else {
+    ventanaAyudaRef.focus();
+  }
+}
+
+// Iframe / postMessage
+function notificarIframe() {
+  const iframe = document.getElementById("visorPanel");
+  if (iframe && iframe.contentWindow) {
+    const stats = calcularEstadisticas(participantes);
+    const masReciente = participantes.length > 0 ? participantes[participantes.length - 1].nombre : "Ninguno";
+    
+    iframe.contentWindow.postMessage({
+      tipo: "actualizacion",
+      total: stats.total,
+      presenciales: stats.presenciales,
+      online: stats.online,
+      masReciente
+    }, location.origin);
+  }
+}
+
+function recibirMensajeIframe(e) {
+  if (e.origin !== location.origin) return;
+  if (e.data && e.data.tipo === "listo") {
+    notificarIframe();
+  }
+}
+
+// JSON Import / Export
 function exportarJSON() {
   document.getElementById("jsonArea").value = JSON.stringify(participantes, null, 2);
+  document.getElementById("mensajeJson").textContent = "Datos exportados correctamente.";
 }
 
 function importarJSON() {
-  const texto = document.getElementById("jsonArea").value;
+  const area = document.getElementById("jsonArea").value;
   const msg = document.getElementById("mensajeJson");
-  msg.textContent = "";
-
   try {
-    const datos = JSON.parse(texto);
-    if (!Array.isArray(datos)) throw new Error("El JSON debe ser una lista de elementos ([...]).");
-
-    const idsProcesados = new Set();
-    const listaNueva = [];
-
-    for (const p of datos) {
-      if (typeof p !== "object" || p === null) throw new Error("Elemento no válido.");
-      
-      const val = validarParticipante(p);
-      if (!val.valido) throw new Error("Error en un participante: " + val.errores.join(", "));
-
-      if (!p.id || !Number.isInteger(p.id) || idsProcesados.has(p.id)) {
-        throw new Error("ID no válido o repetido: " + p.id);
-      }
-      if (isNaN(Date.parse(p.fechaInscripcion))) {
-        throw new Error("Fecha ISO inválida para " + p.nombre);
-      }
-
-      idsProcesados.add(p.id);
-      listaNueva.push({
-        id: p.id,
-        nombre: p.nombre.trim(),
-        edad: Number(p.edad),
-        tipo: p.tipo,
-        modalidad: p.modalidad,
-        experiencia: Number(p.experiencia),
-        fechaInscripcion: p.fechaInscripcion
-      });
+    const datos = JSON.parse(area);
+    if (Array.isArray(datos)) {
+      participantes.length = 0;
+      datos.forEach(p => participantes.push(p));
+      renderizarTodo();
+      msg.style.color = "green";
+      msg.textContent = "Datos importados con éxito.";
+    } else {
+      throw new Error("El JSON debe ser una lista/array de objetos.");
     }
-
-    participantes = listaNueva; // Solo se reemplaza si TODO es válido
-    renderizarTodo();
-    msg.style.color = "green";
-    msg.textContent = "Importación realizada con éxito.";
   } catch (err) {
     msg.style.color = "red";
-    msg.textContent = "Error en la importación: " + err.message; // Conserva la lista anterior si hay fallo
+    msg.textContent = `Error al importar: ${err.message}`;
   }
 }
 
-/* ==========================================================================
-   3. GESTIÓN DE PREFERENCIAS MEDIANTE COOKIES
-   ========================================================================== */
-function leerCookie(nombre) {
-  const prefijo = nombre + "=";
-  const partes = document.cookie.split(";");
-  for (let i = 0; i < partes.length; i++) {
-    const parte = partes[i].trim();
-    if (parte.startsWith(prefijo)) {
-      try {
-        return decodeURIComponent(parte.slice(prefijo.length));
-      } catch (e) { return null; }
-    }
-  }
-  return null;
-}
-
-function guardarCookie(nombre, valor, dias) {
-  const segundos = dias * 24 * 60 * 60; // Max-Age exige el tiempo en segundos
-  let atributos = `; Path=/; Max-Age=${segundos}; SameSite=Lax`;
-  if (location.protocol === "https:") atributos += "; Secure";
-  document.cookie = nombre + "=" + encodeURIComponent(valor) + atributos;
-}
-
-function borrarCookie(nombre) {
-  let atributos = "; Path=/; Max-Age=0; SameSite=Lax"; // Max-Age=0 elimina la cookie
-  if (location.protocol === "https:") atributos += "; Secure";
-  document.cookie = nombre + "=" + atributos;
-}
-
+// Cookies
 function guardarPreferenciasUI() {
-  const t = document.getElementById("selTema").value;
-  const s = document.getElementById("selTamano").value;
-  guardarCookie("pref_tema", t, 30);
-  guardarCookie("pref_tamano", s, 30);
+  const tema = document.getElementById("selTema").value;
+  const tamano = document.getElementById("selTamano").value;
+  document.cookie = `pref_tema=${tema}; path=/; max-age=31536000; SameSite=Lax`;
+  document.cookie = `pref_tamano=${tamano}; path=/; max-age=31536000; SameSite=Lax`;
   aplicarPreferenciasGuardadas();
 }
 
 function restablecerPreferenciasUI() {
-  borrarCookie("pref_tema");
-  borrarCookie("pref_tamano");
-  document.getElementById("selTema").value = "claro";
-  document.getElementById("selTamano").value = "normal";
-  aplicarPreferenciasGuardadas();
+  document.cookie = "pref_tema=; path=/; max-age=0";
+  document.cookie = "pref_tamano=; path=/; max-age=0";
+  document.body.className = "modo-claro fuente-estandar";
 }
 
 function aplicarPreferenciasGuardadas() {
-  const t = leerCookie("pref_tema") || "claro";
-  const s = leerCookie("pref_tamano") || "normal";
-  
-  // Modificamos las clases del body para cambiar el aspecto con CSS
-  document.body.className = "";
-  document.body.classList.add(t === "oscuro" ? "modo-oscuro" : "modo-claro");
-  document.body.classList.add(s === "grande" ? "fuente-grande" : "fuente-estandar");
-  
-  document.getElementById("selTema").value = t;
-  document.getElementById("selTamano").value = s;
-}
+  const cookies = document.cookie.split("; ");
+  let tema = "claro", tamano = "estandar";
 
-/* ==========================================================================
-   4. COMUNICACIÓN CON IFRAME (postMessage)
-   ========================================================================== */
-function enviarMensajeIframe() {
-  const iframe = document.getElementById("visorPanel");
-  if (!iframe || !iframe.contentWindow) return;
-
-  // Calculamos el participante con la fecha de inscripción más reciente
-  let recNombre = "Sin inscripciones";
-  let recFecha = "";
-  if (participantes.length > 0) {
-    let recObj = participantes[0];
-    for (const p of participantes) {
-      if (new Date(p.fechaInscripcion) > new Date(recObj.fechaInscripcion)) recObj = p;
-    }
-    recNombre = recObj.nombre;
-    recFecha = new Date(recObj.fechaInscripcion).toLocaleString("es-ES");
+  for (const c of cookies) {
+    if (c.startsWith("pref_tema=")) tema = c.split("=")[1];
+    if (c.startsWith("pref_tamano=")) tamano = c.split("=")[1];
   }
 
-  const st = calcularEstadisticas(participantes);
-  const datosEnvio = {
-    tipo: "actualizacion",
-    total: st.total,
-    presenciales: st.presenciales,
-    online: st.online,
-    masReciente: recNombre,
-    fechaReciente: recFecha
-  };
-
-  iframe.contentWindow.postMessage(datosEnvio, location.origin); // targetOrigin estricto
-}
-
-function recibirMensajeIframe(e) {
-  if (e.origin !== location.origin) return; // Validación de origen estricta
-  if (e.data && e.data.tipo === "listo") {
-    enviarMensajeIframe(); // Envía los datos iniciales en cuanto el iframe responde que está preparado
-  }
-}
-
-/* ==========================================================================
-   5. CONTROL DE LA VENTANA EMERGENTE DE AYUDA
-   ========================================================================== */
-function abrirVentanaAyuda() {
-  // Reutiliza la ventana si ya está abierta usando la propiedad .closed
-  if (ventanaAyuda !== null && !ventanaAyuda.closed) {
-    ventanaAyuda.focus();
-  } else {
-    ventanaAyuda = window.open("ayuda.html", "VentanaAyuda", "width=500,height=400");
-    if (!ventanaAyuda) {
-      alert("La apertura de la ventana de ayuda fue bloqueada por el navegador.");
-    }
-  }
+  document.body.className = `modo-${tema} fuente-${tamano}`;
 }
