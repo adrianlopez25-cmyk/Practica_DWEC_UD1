@@ -1,12 +1,4 @@
-Aquí tienes la plantilla de README.md completa, estructurada y redactada respetando punto por punto todas las especificaciones del documento oficial del profesor (Practica_DWEC_UD1.pdf) y reflejando exactamente la arquitectura, lógica, pruebas y decisiones implementadas en tu proyecto.
-
-Copia este contenido directamente dentro de tu archivo README.md en la raíz del repositorio de GitHub.
-
-Markdown # Participant Event Manager — Gestor de Participantes de un Evento **Asignatura:** Desarrollo Web en Entorno Cliente (DWEC) | UD1 (Sesiones 1 a 7) **Curso:** 2026 - 2027 **Autor:** [Tu Nombre y Apellidos] **Entrega:** Proyecto en GitHub
-
-\---
-
-\## 1. Descripción General e Instrucciones de Ejecución
+## 1. Descripción General e Instrucciones de Ejecución
 
 Esta aplicación web permite gestionar la inscripción de asistentes a un evento tecnológico. Toda la lógica se ejecuta exclusivamente en el navegador utilizando HTML5, CSS3 y JavaScript ES6+ vanil-la, sin librerías ni frameworks externos.
 
