@@ -2,21 +2,21 @@
 
 Esta aplicación web permite gestionar la inscripción de asistentes a un evento tecnológico. Toda la lógica se ejecuta exclusivamente en el navegador utilizando HTML5, CSS3 y JavaScript, sin librerías ni frameworks externos.
 
-### Guía de ejecución mediante Servidor HTTP Local (Requisito Obligatorio) El proyecto requiere ejecutarse en un entorno servidor HTTP para permitir el correcto intercambio de mensajes seguros por `postMessage` entre orígenes e `iframe`, así como el uso adecuado de cookies sin bloqueos por protocolo `file://`.
+### Guía de Ejecución mediante Servidor HTTP Local (Requisito Obligatorio)
 
-- 1. **Vía VS Code (Live Server):** - Abrir la carpeta raíz del proyecto en VS Code. - Hacer clic derecho sobre `index.html` y seleccionar **"Open with Live Server"**. - La aplicación se abrirá automáticamente en `http://127.0.0.1:5500` o
+El proyecto requiere ejecutarse en un entorno servidor HTTP para permitir el correcto intercambio de mensajes seguros por `postMessage` entre orígenes e `iframe`, así como el uso adecuado de cookies sin bloqueos por protocolo `file://`.
 
-`http://localhost:5500`.
+- **Vía VS Code (Live Server):**
+  1. Abrir la carpeta raíz del proyecto en VS Code.
+  2. Hacer clic derecho sobre `index.html` y seleccionar **"Open with Live Server"**.
+  3. La aplicación se abrirá automáticamente en `http://127.0.0.1:5500` o `http://localhost:5500`.
 
-- 2. **Vía Node.js (`http-server` o `npx`):**
+- **Vía Node.js (`http-server` o `npx`):**
+  1. Abrir la terminal en la raíz del proyecto.
+  2. Ejecutar: `npx http-server -p 8080`
+  3. Acceder en el navegador a: `http://localhost:8080`.
 
-- \- Abrir la terminal en la raíz del proyecto.
-
-- \- Ejecutar: `npx http-server -p 8080`
-
-- \- Acceder en el navegador a: `http://localhost:8080`.
-
-\---
+---
 
 ## 2. Estructura del Proyecto
 
@@ -362,22 +362,30 @@ De acuerdo con las directrices de la práctica, la Inteligencia Artificial se ut
 - Enlace al Chat de IA: https://gemini.google.com/share/d/1178IIErd4D8fEKl4yo7h7r7MZkptuuIi?usp=sharing
 
 ## Registro de Decisión y Análisis Técnico
-### 6.1. Registro de Decisión: Gestión de Formulario y Eventos en la Interfaz (`main.js`)
+---
+
+### 6.1. Registro de Decisión: Gestión de Formulario y Eventos en la Interfaz (main.js)
 
 #### Consulta Realizada a la IA
-Cuando terminé de montar la estructura de `index.html`, los estilos CSS y las funciones de `logica.js`, me quedé atascado antes de empezar con `main.js`. No tenía claro cómo gestionar bien el formulario desde JavaScript: el envío, cómo leer lo que escribe el usuario, limpiar los campos y cuándo usar `addEventListener` con eventos como `submit`, `input` o `change`. Le pedí a la IA que me explicara la teoría de cómo funciona todo esto con ejemplos conceptuales abstractos, pidiéndole explícitamente que no me diera código de mi propia práctica para no copiarlo y poder hacerlo yo mismo.
+
+Cuando terminé de montar la estructura de index.html, los estilos CSS y las funciones de logica.js, me quedé atascado antes de empezar con main.js. No tenía claro cómo gestionar bien el formulario desde JavaScript: el envío, cómo leer lo que escribe el usuario, limpiar los campos y cuándo usar addEventListener con eventos como submit, input o change. Le pedí a la IA que me explicara la teoría de cómo funciona todo esto con ejemplos conceptuales abstractos, pidiéndole explícitamente que no me diera código de mi propia práctica para no copiarlo y poder hacerlo yo mismo.
 
 #### Conceptos Teóricos Aprendidos
+
 La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e interactuar con el DOM desde la interfaz:
+
 1. **Evitar la recarga de la página:** Al pulsar el botón de enviar, el navegador intenta recargar la página por defecto. Para evitarlo hay que escuchar el evento submit sobre el formulario y ejecutar evento.preventDefault().
 2. **Leer y transformar los datos de entrada:** Todo lo que entra por un campo de texto en HTML llega como una cadena de texto (String). Para que los datos sean fiables, hay que aplicar .trim() para eliminar espacios en blanco innecesarios al principio y al final, y convertir los valores explícitamente con Number().
 3. **Limpiar el formulario:** Se pueden resetear los campos asignándoles una cadena vacía (.value = '') o mediante la instrucción formulario.reset().
 4. **Eventos en tiempo real:** Para reaccionar inmediatamente a las acciones del usuario sin esperar al envío, el evento change sirve para reaccionar al cambiar de opción en desplegables (<select>), mientras que el evento input se dispara de forma instantánea al escribir o borrar en campos de texto.
 
 #### Decisiones Tomadas y Aplicación en el Proyecto
-* **Uso de preventDefault():** Decidí aplicarlo dentro del listener del formulario de inscripción. De esta forma, la alta del participante se procesa en segundo plano sin refrescar la ventana, lo que permite actualizar dinámicamente las tarjetas en el DOM, recalcular las estadísticas y notificar los datos al iframe sin perder el estado de la aplicación.
-* **Saneamiento previo a la validación:** Entendí que la función pura de logica.js debe recibir los datos bien formateados. Por eso, en main.js aplico .trim() a los campos de texto y convierto la edad y la experiencia mediante Number() justo antes de pasárselos a la función validarParticipante().
-* **Filtros en tiempo real:** Decidí usar el evento input para el buscador de participantes por nombre y el evento change para el selector de modalidad. Así, la vista de tarjetas se actualiza al instante mientras el usuario escribe o selecciona, combinando la búsqueda y el filtro de forma fluida.
+
+- **Uso de preventDefault():** Decidí aplicarlo dentro del listener del formulario de inscripción. De esta forma, la alta del participante se procesa en segundo plano sin refrescar la ventana, lo que permite actualizar dinámicamente las tarjetas en el DOM, recalcular las estadísticas y notificar los datos al iframe sin perder el estado de la aplicación.
+- **Saneamiento previo a la validación:** Entendí que la función pura de logica.js debe recibir los datos bien formateados. Por eso, en main.js aplico .trim() a los campos de texto y convierto la edad y la experiencia mediante Number() justo antes de pasárselos a la función validarParticipante().
+- **Filtros en tiempo real:** Decidí usar el evento input para el buscador de participantes por nombre y el evento change para el selector de modalidad. Así, la vista de tarjetas se actualiza al instante mientras el usuario escribe o selecciona, combinando la búsqueda y el filtro de forma fluida.
+
+---
 
 ## 7. Evidencias de Depuración y Red
 
@@ -389,6 +397,7 @@ La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e intera
   2. Se colocó un punto de interrupción (*breakpoint*) en la línea 71 de logica.js.
   3. Se completó el formulario de alta con datos de prueba y se pulsó "Registrar Participante".
   4. La ejecución se pausó automáticamente en el *breakpoint*, permitiendo inspeccionar las variables del objeto datos (edadTexto, edadNum) en el panel **Scope** y avanzar paso a paso con F10 (*Step Over*) para verificar la evaluación condicional de errores.
+
 <img width="1920" height="946" alt="image" src="https://github.com/user-attachments/assets/b96a5252-7690-4656-af46-f6d40468c58f" />
 
 ### 7.2. Evidencia de Peticiones en la Pestaña Network
@@ -402,6 +411,7 @@ La IA me detalló cuatro puntos clave sobre cómo gestionar formularios e intera
 
 * **Análisis de Seguridad y Same-Origin Policy (SOP):**
 Todas las peticiones comparten exactamente el mismo protocolo (http), host (127.0.0.1) y puerto (5500). Esto garantiza un origen único y seguro, permitiendo que la comunicación bidireccional por postMessage entre la ventana principal y el iframe se valide de forma estricta contra event.origin sin bloqueos de seguridad del navegador.
+
 <img width="566" height="586" alt="image" src="https://github.com/user-attachments/assets/a3677919-2dd4-432d-a59c-d76340401601" />
 
 
